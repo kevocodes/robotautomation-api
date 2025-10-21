@@ -1,0 +1,49 @@
+<div
+  style='font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px'
+>
+  <table
+    style='
+          max-width: 600px;
+          margin: 0 auto;
+          background-color: #ffffff;
+          padding: 16px;
+          border-radius: 5px;
+        '
+  >
+    <tr>
+      <td style='padding: 20px 0; text-align: center'>
+        <h1 style='color: #333333; font-size: 24px; margin: 0'>
+          ¡Bienvenido
+          {{name}}!
+        </h1>
+      </td>
+    </tr>
+    <tr>
+      <td style='padding: 0 20px'>
+        <p style='color: #333333; font-size: 16px; line-height: 1.5'>
+          Para verificar tu dirección de correo electrónico, este es tu código:
+        </p>
+        <blockquote
+          style='border-left: 4px solid #2563EB; padding-left: 8px; margin: 0;'
+        >
+          <a
+            style='text-decoration: none; font-weight: bold; font-size: 24px;'
+          >{{otp}}</a>
+        </blockquote>
+        <p style='color: #333333; font-size: 16px; line-height: 1.5'>
+          Este código expirará el
+          {{expiresAt}}. Si no solicitaste verificar tu cuenta, ignora este
+          mensaje.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style='padding: 20px 0; text-align: center'>
+        <p style='color: #999999; font-size: 14px; line-height: 1.5'>
+          Este correo electrónico fue enviado automáticamente. Por favor, no
+          respondas a este mensaje.
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>

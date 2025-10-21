@@ -1,0 +1,62 @@
+<div
+  style='font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px'
+>
+  <table
+    style='
+          max-width: 600px;
+          margin: 0 auto;
+          background-color: #ffffff;
+          padding: 16px;
+          border-radius: 5px;
+        '
+  >
+    <tr>
+      <td style='padding: 20px 0; text-align: center'>
+        <h1 style='color: #333333; font-size: 24px; margin: 0'>
+          ¡{{name}}
+          quiere contactarnos!
+        </h1>
+      </td>
+    </tr>
+    <tr>
+      <td style='padding: 0 20px'>
+        <p style='color: #333333; font-size: 16px; line-height: 1.5'>
+          Hemos recibido un mensaje a través de nuestro formulario de contacto.
+          A continuación te mostramos los datos de la persona que ha enviado el
+          mensaje:
+        </p>
+        <h3 style='color: #333333; font-size: 18px; line-height: 1.5'>
+          Mensaje de contacto:
+        </h3>
+        <blockquote
+          style='border-left: 4px solid #2563EB; padding-left: 8px; font-style: italic; margin: 0;'
+        >
+          {{message}}
+        </blockquote>
+        <ul
+          style='
+                color: #333333;
+                font-size: 16px;
+                line-height: 1.5;
+                padding-left: 20px;
+              '
+        >
+          <li>Nombre: {{name}} {{lastname}}</li>
+          <li>Correo electrónico: {{email}}</li>
+          <li>Número de teléfono: {{phoneNumber}}</li>
+        </ul>
+        <p style='color: #333333; font-size: 16px; line-height: 1.5'>
+          Por favor, responder con la mayor brevedad posible.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style='padding: 20px 0; text-align: center'>
+        <p style='color: #999999; font-size: 14px; line-height: 1.5'>
+          Este correo electrónico fue enviado automáticamente. Por favor, no
+          respondas a este mensaje.
+        </p>
+      </td>
+    </tr>
+  </table>
+</div>
