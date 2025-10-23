@@ -8,12 +8,14 @@ import envConfig from './config/environment/env.config';
 import { ConfigType } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { CloudinaryModule } from './config/cloudinary/cloudinary.module';
+import { DeiBookingModule } from './dei-booking/dei-booking.module';
 @Module({
   imports: [
     AuthModule,
     ConfigModule,
     UsersModule,
     MailModule,
+    DeiBookingModule,
     ThrottlerModule.forRootAsync({
       inject: [envConfig.KEY],
       useFactory: (configService: ConfigType<typeof envConfig>) => [

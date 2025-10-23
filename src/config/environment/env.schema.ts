@@ -28,4 +28,10 @@ export default Joi.object({
   OTPS_EXPIRES_IN: Joi.number().required(),
   FORGOT_PASSWORD_PAGE: Joi.string().required(),
   FORGOT_PASSWORD_TOKEN_EXPIRES_IN: Joi.number().required(),
+  DEI_API_URL: Joi.string().uri().required(),
+  DEI_AUTH_PATH: Joi.string().required(),
+  DEI_USERNAME: Joi.string().required(),
+  DEI_PASSWORD: Joi.string().required(),
+  DEI_IDENTIFIER: Joi.string().required(),
+  DEI_TOKEN_EXPIRATION: Joi.number().required(),
 });

@@ -52,4 +52,12 @@ export default registerAs('env', () => ({
     page: process.env.FORGOT_PASSWORD_PAGE,
     expiresIn: parseInt(process.env.FORGOT_PASSWORD_TOKEN_EXPIRES_IN, 10),
   },
+  deiBooking: {
+    apiUrl: process.env.DEI_API_URL,
+    authPath: process.env.DEI_AUTH_PATH,
+    username: process.env.DEI_USERNAME,
+    password: process.env.DEI_PASSWORD,
+    identifier: process.env.DEI_IDENTIFIER,
+    tokenExpiration: parseInt(process.env.DEI_TOKEN_EXPIRATION, 10),
+  },
 }));
