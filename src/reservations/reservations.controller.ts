@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { EmailVerifiedGuard } from 'src/common/guards/emailVerified.guard';
@@ -25,7 +25,7 @@ export class ReservationsController {
       await this.reservationsService.getAllReservations(query);
 
     return {
-      statusCode: 200,
+      statusCode: HttpStatus.OK,
       message: 'Reservations retrieved successfully',
       data: reservations,
     };

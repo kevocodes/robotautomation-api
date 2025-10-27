@@ -56,6 +56,21 @@ model SelectedResource {
   @@map("selected-resources")
 }
 
+// schema.prisma
+
+model GlobalConfig {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  key String @unique @default("GLOBAL")
+
+  cleaningStartOffsetMinutes Int @default(15)
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@map("global-configs")
+}
+
 // model Activity {
 //   id       String   @id @default(auto()) @map("_id") @db.ObjectId
 //   title    String
