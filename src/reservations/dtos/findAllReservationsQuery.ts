@@ -3,12 +3,18 @@ import { Type } from 'class-transformer';
 import { IsDateString, IsNumber, IsOptional } from 'class-validator';
 
 export class FindAllReservationsQueryDto {
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    format: 'date-time',
+    example: '2025-10-20T22:32:21Z',
+  })
   @IsOptional()
   @IsDateString()
   startDateTime?: string;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({
+    format: 'date-time',
+    example: '2025-10-21T22:32:21Z',
+  })
   @IsOptional()
   @IsDateString()
   endDateTime?: string;

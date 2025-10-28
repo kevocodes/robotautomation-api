@@ -44,8 +44,12 @@ export class AppConfigController {
   @Patch()
   async updateSettings(
     @Body() updateConfigDto: UpdateAppConfigDto,
-  ): Promise<GlobalConfig> {
+  ): Promise<ApiResponse<GlobalConfig>> {
     // El servicio se encarga de actualizar la DB e invalidar el caché
-    return this.configService.updateSettings(updateConfigDto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Settings updated successfully',
+      data: await this.configService.updateSettings(updateConfigDto),
+    };
   }
 }

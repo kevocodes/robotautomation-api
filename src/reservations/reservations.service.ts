@@ -13,9 +13,9 @@ export class ReservationsService {
 
   async getAllReservations(
     query: FindAllReservationsQueryDto,
-  ): Promise<ReservationDeiResponse[]> {
+  ): Promise<ReservationDeiResponse> {
     try {
-      const response = await this.deiBookingApi.get<ReservationDeiResponse[]>(
+      const response = await this.deiBookingApi.get<ReservationDeiResponse>(
         this.reservationsPath,
         { params: query },
       );

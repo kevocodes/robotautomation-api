@@ -9,6 +9,8 @@ import { ConfigType } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { DeiBookingModule } from './dei-booking/dei-booking.module';
 import { ReservationsModule } from './reservations/reservations.module';
+import { ResourcesModule } from './resources/resources.module';
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     AuthModule,
@@ -16,6 +18,7 @@ import { ReservationsModule } from './reservations/reservations.module';
     UsersModule,
     MailModule,
     DeiBookingModule,
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRootAsync({
       inject: [envConfig.KEY],
       useFactory: (configService: ConfigType<typeof envConfig>) => [
@@ -31,6 +34,7 @@ import { ReservationsModule } from './reservations/reservations.module';
       ],
     }),
     ReservationsModule,
+    ResourcesModule,
   ],
   providers: [
     {

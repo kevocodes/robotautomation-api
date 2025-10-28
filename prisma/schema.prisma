@@ -33,27 +33,20 @@ model User {
 }
 
 model Resource {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  externalResourceId String @unique
+
   name     String
   location String
 
+  isActive Boolean @default(true)
+  isSelected Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  SelectedResource SelectedResource[]
 
   @@map("resources")
-}
-
-model SelectedResource {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  resourceId String   @db.ObjectId
-  resource   Resource @relation(fields: [resourceId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("selected-resources")
 }
 
 // schema.prisma
