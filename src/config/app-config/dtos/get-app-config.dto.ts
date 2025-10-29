@@ -4,4 +4,8 @@ export class GetAppConfigDto {
   @IsInt()
   @Min(0)
   cleaningStartOffsetMinutes: number;
+
+  @IsInt()
+  @Min(0)
+  cleaningDurationMinutes: number;
 }
