@@ -9,7 +9,7 @@ import { Roles } from 'src/common/decorators/role.decorator';
 import { Role } from '@prisma/client';
 import { FindAllReservationsQueryDto } from './dtos/findAllReservationsQuery';
 import { GetAllReservationsByResourcesQueryDto } from './dtos/finAllReservationsByResources';
-import { ReservationDeiResponse } from './dtos/reservationsDeiResponse';
+import { ReservationDeiResponseWithCleaningEvents } from './dtos/reservationsDeiResponse';
 
 @ApiTags('Reservations')
 @ApiBearerAuth()
@@ -22,7 +22,7 @@ export class ReservationsController {
   @Get()
   async getAllReservations(
     @Query() query: FindAllReservationsQueryDto,
-  ): Promise<ApiResponse<ReservationDeiResponse>> {
+  ): Promise<ApiResponse<ReservationDeiResponseWithCleaningEvents>> {
     const reservations =
       await this.reservationsService.getAllReservations(query);
 
@@ -37,7 +37,7 @@ export class ReservationsController {
   @Get('by-resources')
   async getAllReservationsByResources(
     @Query() params: GetAllReservationsByResourcesQueryDto,
-  ): Promise<ApiResponse<ReservationDeiResponse>> {
+  ): Promise<ApiResponse<ReservationDeiResponseWithCleaningEvents>> {
     const reservationsResponse = await Promise.all(
       params.resourceIds.map((resourceId) =>
         this.reservationsService.getAllReservations({
@@ -52,6 +52,9 @@ export class ReservationsController {
       .map((res) => res.reservations)
       .flat();
 
+    const cleaningEvents =
+      await this.reservationsService.generateCleaningEvents(reservations);
+
     return {
       statusCode: HttpStatus.OK,
       message: 'Upcoming reservations retrieved successfully',
@@ -61,6 +64,7 @@ export class ReservationsController {
         reservations,
         startDateTime: params.startDateTime,
         endDateTime: params.endDateTime,
+        cleaningEvents,
       },
     };
   }

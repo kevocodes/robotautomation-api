@@ -1,12 +1,20 @@
+import { ReservationCleaningEvent } from './reservationCleaningEvent';
+
 export interface ReservationDeiResponse {
   links: any[];
   message: null;
   reservations: Reservation[];
   startDateTime: string;
   endDateTime: string;
+  cleaningEvents?: ReservationCleaningEvent[];
 }
 
-interface Reservation {
+export interface ReservationDeiResponseWithCleaningEvents
+  extends ReservationDeiResponse {
+  cleaningEvents: ReservationCleaningEvent[];
+}
+
+export interface Reservation {
   links: Link[];
   message: null;
   referenceNumber: string;
