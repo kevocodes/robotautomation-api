@@ -56,7 +56,7 @@ model SelectedResource {
   resourceId String   @unique @db.ObjectId
   resource   Resource @relation(fields: [resourceId], references: [id])
 
-  priority Int @unique
+  priority Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

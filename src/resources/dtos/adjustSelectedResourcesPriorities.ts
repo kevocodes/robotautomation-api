@@ -1,18 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId, IsNumber } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsMongoId } from 'class-validator';
 
 export class AdjustSelectedResourcesPrioritiesDto {
   @ApiProperty({
-    description: 'ID of the selected resource to adjust priority',
-    example: '',
+    type: [String],
+    description: 'IDs de SelectedResource en el nuevo orden (down-top)',
   })
-  @IsMongoId()
-  selectedResourceId: string;
-
-  @ApiProperty({
-    description: 'New priority for the selected resource',
-    example: 2,
-  })
-  @IsNumber()
-  newPriority: number;
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsMongoId({ each: true })
+  orderedIds: string[];
 }

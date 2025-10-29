@@ -106,76 +106,62 @@ export class ResourcesService {
     });
   }
 
-  async adjustSelectedResourcesPriorities(
-    idSelectedResource: string,
-    newPriority: number,
-  ): Promise<void> {
-    const selectedResource = await this.prisma.selectedResource.findUnique({
-      where: { id: idSelectedResource },
+  async adjustSelectedResourcesPriorities(orderedIds: string[]): Promise<void> {
+    if (!orderedIds.length) {
+      throw new BadRequestException('orderedIds cannot be empty');
+    }
+
+    const uniqueIds = new Set(orderedIds);
+    if (uniqueIds.size !== orderedIds.length) {
+      throw new BadRequestException('orderedIds must contain unique values');
+    }
+
+    const selectedResources = await this.prisma.selectedResource.findMany({
+      select: { id: true },
+      orderBy: { priority: 'asc' },
     });
 
-    if (!selectedResource) {
-      throw new NotFoundException('Resource selection not found');
+    if (selectedResources.length !== orderedIds.length) {
+      throw new BadRequestException(
+        'orderedIds must include every selected resource',
+      );
     }
 
-    const currentPriority = selectedResource.priority;
+    const selectedIds = new Set(selectedResources.map(({ id }) => id));
 
-    if (newPriority === currentPriority) return;
-
-    const totalSelected = await this.prisma.selectedResource.count();
-
-    if (newPriority < 1 || newPriority > totalSelected) {
-      throw new BadRequestException('Priority out of range');
+    for (const id of orderedIds) {
+      if (!selectedIds.has(id)) {
+        throw new BadRequestException(`Selected resource ${id} does not exist`);
+      }
     }
 
-    const isMovingUp = newPriority < currentPriority;
+    const updateOperations = orderedIds.map((id, index) =>
+      this.prisma.selectedResource.update({
+        where: { id },
+        data: { priority: index + 1 },
+      }),
+    );
 
-    // Envolvemos la transacción en un try...catch
     try {
-      await this.prisma.$transaction(async (tx) => {
-        // 1. "Aparcar" el recurso
-        await tx.selectedResource.update({
-          where: { id: idSelectedResource },
-          data: { priority: -1 }, // Valor temporal
-        });
-
-        // 2. "Desplazar" los otros recursos
-        await tx.selectedResource.updateMany({
-          where: {
-            id: { not: idSelectedResource },
-            priority: isMovingUp
-              ? { gte: newPriority, lt: currentPriority }
-              : { lte: newPriority, gt: currentPriority },
-          },
-          data: isMovingUp
-            ? { priority: { increment: 1 } }
-            : { priority: { decrement: 1 } },
-        });
-
-        // 3. "Colocar" el recurso en su nueva posición
-        await tx.selectedResource.update({
-          where: { id: idSelectedResource },
-          data: { priority: newPriority },
-        });
-      });
+      await this.prisma.$transaction(updateOperations);
     } catch (error) {
-      // Manejo de errores de Prisma
+      this.logger.error(
+        'Failed to adjust selected resources priorities',
+        (error as Error).stack,
+      );
+
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        // Código 'P2034' es para "Transaction failed due to a write conflict or a deadlock".
-        // Esto es común en operaciones de reordenamiento con alta concurrencia.
-        if (error.code === 'P2034') {
-          throw new ConflictException(
-            'Concurrency conflict. The list was modified by another user. Please try again.',
-          );
-        }
+        throw new ConflictException(
+          'Cannot adjust priorities due to a data conflict',
+        );
       }
 
-      // Para cualquier otro error de DB o error inesperado
       throw new InternalServerErrorException(
-        'An error occurred while reordering the resources.',
+        'Unexpected error adjusting selected resources priorities',
       );
     }
   }
+
   /**
    * Tarea programada.
    */

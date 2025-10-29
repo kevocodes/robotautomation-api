@@ -83,8 +83,7 @@ export class ResourcesController {
     body: AdjustSelectedResourcesPrioritiesDto,
   ): Promise<ApiResponse> {
     await this.resourcesService.adjustSelectedResourcesPriorities(
-      body.selectedResourceId,
-      body.newPriority,
+      body.orderedIds,
     );
 
     return {
