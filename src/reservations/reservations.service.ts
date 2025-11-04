@@ -24,6 +24,8 @@ export class ReservationsService {
 
   async getAllReservations(
     query: FindAllReservationsQueryDto,
+    contextReservations?: Reservation[],
+    allowedResourceIds?: Set<string>,
   ): Promise<ReservationDeiResponseWithCleaningEvents> {
     try {
       const response = await this.deiBookingApi.get<ReservationDeiResponse>(
@@ -31,8 +33,24 @@ export class ReservationsService {
         { params: query },
       );
 
+      const externalContext =
+        contextReservations ?? (await this.getCleaningContext(query));
+
+      const mergedContext = this.mergeReservationCollections(
+        externalContext,
+        response.data.reservations,
+      );
+
+      const resourceFilter =
+        allowedResourceIds ??
+        (query.resourceId !== undefined
+          ? new Set([String(query.resourceId)])
+          : undefined);
+
       const cleaningEvents = await this.generateCleaningEvents(
         response.data.reservations,
+        mergedContext,
+        resourceFilter,
       );
 
       return {
@@ -56,11 +74,125 @@ export class ReservationsService {
     }
   }
 
+  async getCleaningContext(
+    query: FindAllReservationsQueryDto,
+  ): Promise<Reservation[]> {
+    const selectedResources = await this.prisma.selectedResource.findMany({
+      include: { resource: true },
+    });
+    1;
+    if (!selectedResources.length) {
+      return [];
+    }
+
+    const { resourceId, ...baseQuery } = query;
+    void resourceId; // Ignore resourceId from the base query
+
+    try {
+      const reservationBatches = await Promise.all(
+        selectedResources
+          .map((selectedResource) => {
+            const externalResourceId =
+              selectedResource.resource?.externalResourceId;
+
+            if (!externalResourceId?.length) {
+              this.logger.warn(
+                `Skipping selected resource ${selectedResource.id} due to missing externalResourceId`,
+              );
+              return null;
+            }
+
+            const parsedResourceId = Number(externalResourceId);
+
+            if (!Number.isFinite(parsedResourceId)) {
+              this.logger.warn(
+                `Skipping selected resource ${selectedResource.id} due to invalid externalResourceId ${externalResourceId}`,
+              );
+              return null;
+            }
+
+            return this.deiBookingApi
+              .get<ReservationDeiResponse>(this.reservationsPath, {
+                params: {
+                  ...baseQuery,
+                  resourceId: parsedResourceId,
+                },
+              })
+              .then((response) => response.data.reservations);
+          })
+          .filter(
+            (value): value is Promise<ReservationDeiResponse['reservations']> =>
+              value !== null,
+          ),
+      );
+
+      return this.mergeReservationCollections(...reservationBatches);
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message?: string }>;
+
+      const errorMessage =
+        axiosError.response?.data?.message ??
+        axiosError.message ??
+        'Unknown error while fetching reservations';
+
+      this.logger.error(
+        `Failed to fetch reservations for cleaning context: ${errorMessage}`,
+      );
+
+      throw new BadGatewayException(
+        'No fue posible obtener las reservaciones desde DEI Booking',
+      );
+    }
+  }
+
   async generateCleaningEvents(
     reservations: Reservation[],
+    contextReservations?: Reservation[],
+    allowedResourceIds?: Set<string>,
   ): Promise<ReservationCleaningEvent[]> {
     if (!reservations?.length) {
       return [];
+    }
+
+    const schedule = await this.buildCleaningSchedule(
+      contextReservations?.length ? contextReservations : reservations,
+    );
+
+    const seenReservations = new Set<string>();
+    const cleaningEvents: ReservationCleaningEvent[] = [];
+
+    for (const reservation of reservations) {
+      const reservationKey = this.getReservationKey(reservation);
+
+      if (seenReservations.has(reservationKey)) {
+        continue;
+      }
+
+      seenReservations.add(reservationKey);
+
+      const entry = schedule.get(reservationKey);
+
+      if (!entry) {
+        continue;
+      }
+
+      if (allowedResourceIds && !allowedResourceIds.has(entry.resourceId)) {
+        continue;
+      }
+
+      cleaningEvents.push(entry.event);
+    }
+
+    return cleaningEvents;
+  }
+
+  private async buildCleaningSchedule(
+    reservations: Reservation[],
+  ): Promise<
+    Map<string, { event: ReservationCleaningEvent; resourceId: string }>
+  > {
+    if (!reservations?.length) {
+      return new Map();
     }
 
     const [config, selectedResources] = await Promise.all([
@@ -120,7 +252,7 @@ export class ReservationsService {
     }
 
     if (!candidates.length) {
-      return [];
+      return new Map();
     }
 
     candidates.sort((a, b) => {
@@ -138,9 +270,20 @@ export class ReservationsService {
       );
     });
 
-    const cleaningEvents: ReservationCleaningEvent[] = [];
+    const schedule = new Map<
+      string,
+      { event: ReservationCleaningEvent; resourceId: string }
+    >();
     let currentGroup: ReservationCandidate[] = [];
     let currentGroupEnd = 0;
+
+    const finalizeGroup = (group: ReservationCandidate[]) => {
+      const winner = this.selectWinner(group);
+      schedule.set(this.getReservationKey(winner.reservation), {
+        event: this.buildCleaningEventFromCandidate(winner),
+        resourceId: winner.reservation.resourceId,
+      });
+    };
 
     for (const candidate of candidates) {
       if (!currentGroup.length) {
@@ -158,57 +301,82 @@ export class ReservationsService {
         continue;
       }
 
-      cleaningEvents.push(this.buildCleaningEvent(currentGroup));
+      finalizeGroup(currentGroup);
       currentGroup = [candidate];
       currentGroupEnd = candidate.cleaningEnd.getTime();
     }
 
     if (currentGroup.length) {
-      cleaningEvents.push(this.buildCleaningEvent(currentGroup));
+      finalizeGroup(currentGroup);
     }
 
-    return cleaningEvents;
+    return schedule;
   }
 
-  private buildCleaningEvent(
+  private selectWinner(
     group: {
       reservation: Reservation;
       cleaningStart: Date;
       cleaningEnd: Date;
       priority: number;
     }[],
-  ): ReservationCleaningEvent {
-    const winner = group.reduce((best, current) => {
-      if (current.priority < best.priority) {
-        return current;
-      }
-
-      if (current.priority === best.priority) {
-        const startDiff =
-          current.cleaningStart.getTime() - best.cleaningStart.getTime();
-        if (startDiff < 0) {
-          return current;
-        }
-
-        if (startDiff === 0) {
-          return current.reservation.referenceNumber.localeCompare(
+  ) {
+    return group.reduce((best, current) => {
+      if (
+        current.priority < best.priority ||
+        (current.priority === best.priority &&
+          current.cleaningStart.getTime() < best.cleaningStart.getTime()) ||
+        (current.priority === best.priority &&
+          current.cleaningStart.getTime() === best.cleaningStart.getTime() &&
+          current.reservation.referenceNumber.localeCompare(
             best.reservation.referenceNumber,
-          ) < 0
-            ? current
-            : best;
-        }
+          ) < 0)
+      ) {
+        return current;
       }
 
       return best;
     }, group[0]);
+  }
 
+  private buildCleaningEventFromCandidate(candidate: {
+    reservation: Reservation;
+    cleaningStart: Date;
+    cleaningEnd: Date;
+  }): ReservationCleaningEvent {
     return {
-      startDate: winner.cleaningStart.toISOString(),
-      endDate: winner.cleaningEnd.toISOString(),
-      resourceName: winner.reservation.resourceName,
-      color: winner.reservation.color,
-      textColor: winner.reservation.textColor,
+      startDate: candidate.cleaningStart.toISOString(),
+      endDate: candidate.cleaningEnd.toISOString(),
+      resourceName: candidate.reservation.resourceName,
+      color: candidate.reservation.color,
+      textColor: candidate.reservation.textColor,
     };
+  }
+
+  private mergeReservationCollections(
+    ...collections: (Reservation[] | undefined)[]
+  ): Reservation[] {
+    const merged = new Map<string, Reservation>();
+
+    for (const collection of collections) {
+      if (!collection?.length) {
+        continue;
+      }
+
+      for (const reservation of collection) {
+        const key = this.getReservationKey(reservation);
+
+        if (!merged.has(key)) {
+          merged.set(key, reservation);
+        }
+      }
+    }
+
+    return Array.from(merged.values());
+  }
+
+  private getReservationKey(reservation: Reservation): string {
+    return `${reservation.referenceNumber}::${reservation.resourceId}`;
   }
 
   private shiftMinutes(date: Date, minutes: number): Date {

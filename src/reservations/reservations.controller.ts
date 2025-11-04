@@ -38,13 +38,25 @@ export class ReservationsController {
   async getAllReservationsByResources(
     @Query() params: GetAllReservationsByResourcesQueryDto,
   ): Promise<ApiResponse<ReservationDeiResponseWithCleaningEvents>> {
+    const context = await this.reservationsService.getCleaningContext({
+      startDateTime: params.startDateTime,
+      endDateTime: params.endDateTime,
+    });
+
+    const allowedResourceIds = new Set(
+      params.resourceIds.map((id) => String(id)),
+    );
+
     const reservationsResponse = await Promise.all(
       params.resourceIds.map((resourceId) =>
-        this.reservationsService.getAllReservations({
-          resourceId,
-          startDateTime: params.startDateTime,
-          endDateTime: params.endDateTime,
-        }),
+        this.reservationsService.getAllReservations(
+          {
+            resourceId,
+            startDateTime: params.startDateTime,
+            endDateTime: params.endDateTime,
+          },
+          context,
+        ),
       ),
     );
 
@@ -53,7 +65,11 @@ export class ReservationsController {
       .flat();
 
     const cleaningEvents =
-      await this.reservationsService.generateCleaningEvents(reservations);
+      await this.reservationsService.generateCleaningEvents(
+        reservations,
+        context,
+        allowedResourceIds,
+      );
 
     return {
       statusCode: HttpStatus.OK,
