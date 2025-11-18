@@ -34,4 +34,10 @@ export default Joi.object({
   DEI_PASSWORD: Joi.string().required(),
   DEI_IDENTIFIER: Joi.string().required(),
   DEI_TOKEN_EXPIRATION: Joi.number().required(),
+  MQTT_URL: Joi.string().required(),
+  MQTT_USERNAME: Joi.string().optional(),
+  MQTT_PASSWORD: Joi.string().optional(),
+  MQTT_CLIENT_ID: Joi.string().optional(),
+  MQTT_KEEPALIVE: Joi.number().default(60),
+  MQTT_RECONNECT_PERIOD: Joi.number().default(5000),
 });

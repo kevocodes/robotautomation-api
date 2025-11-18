@@ -18,6 +18,7 @@ import { Prisma, Resource, SelectedResource } from '@prisma/client';
 export class ResourcesService {
   private readonly logger = new Logger(ResourcesService.name);
   private readonly resourcesPath = '/Resources/';
+  private readonly maxSelectionLimit = 2;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -41,6 +42,15 @@ export class ResourcesService {
   }
 
   async selectResource(id: string): Promise<SelectedResource> {
+    // Verify selection limit
+    const currentSelectionsCount = await this.prisma.selectedResource.count();
+
+    if (currentSelectionsCount >= this.maxSelectionLimit) {
+      throw new BadRequestException(
+        `Selection limit of ${this.maxSelectionLimit} reached`,
+      );
+    }
+
     const resource = await this.getOneById(id);
 
     // Check if already selected
