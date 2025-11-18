@@ -2,6 +2,18 @@ import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
 
 export class ReservationCleaningEvent {
   @IsNotEmpty()
+  @IsString()
+  id: string;
+
+  @IsNotEmpty()
+  @IsString()
+  reservationReferenceNumber: string;
+
+  @IsNotEmpty()
+  @IsString()
+  resourceId: string;
+
+  @IsNotEmpty()
   @IsDateString()
   startDate: string;
 

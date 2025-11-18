@@ -170,17 +170,17 @@ export class ReservationsService {
 
       seenReservations.add(reservationKey);
 
-      const entry = schedule.get(reservationKey);
+      const event = schedule.get(reservationKey);
 
-      if (!entry) {
+      if (!event) {
         continue;
       }
 
-      if (allowedResourceIds && !allowedResourceIds.has(entry.resourceId)) {
+      if (allowedResourceIds && !allowedResourceIds.has(event.resourceId)) {
         continue;
       }
 
-      cleaningEvents.push(entry.event);
+      cleaningEvents.push(event);
     }
 
     return cleaningEvents;
@@ -188,9 +188,7 @@ export class ReservationsService {
 
   private async buildCleaningSchedule(
     reservations: Reservation[],
-  ): Promise<
-    Map<string, { event: ReservationCleaningEvent; resourceId: string }>
-  > {
+  ): Promise<Map<string, ReservationCleaningEvent>> {
     if (!reservations?.length) {
       return new Map();
     }
@@ -270,19 +268,16 @@ export class ReservationsService {
       );
     });
 
-    const schedule = new Map<
-      string,
-      { event: ReservationCleaningEvent; resourceId: string }
-    >();
+    const schedule = new Map<string, ReservationCleaningEvent>();
     let currentGroup: ReservationCandidate[] = [];
     let currentGroupEnd = 0;
 
     const finalizeGroup = (group: ReservationCandidate[]) => {
       const winner = this.selectWinner(group);
-      schedule.set(this.getReservationKey(winner.reservation), {
-        event: this.buildCleaningEventFromCandidate(winner),
-        resourceId: winner.reservation.resourceId,
-      });
+      schedule.set(
+        this.getReservationKey(winner.reservation),
+        this.buildCleaningEventFromCandidate(winner),
+      );
     };
 
     for (const candidate of candidates) {
@@ -344,7 +339,12 @@ export class ReservationsService {
     cleaningStart: Date;
     cleaningEnd: Date;
   }): ReservationCleaningEvent {
+    const reservationKey = this.getReservationKey(candidate.reservation);
+
     return {
+      id: `${reservationKey}::${candidate.cleaningStart.toISOString()}`,
+      reservationReferenceNumber: candidate.reservation.referenceNumber,
+      resourceId: candidate.reservation.resourceId,
       startDate: candidate.cleaningStart.toISOString(),
       endDate: candidate.cleaningEnd.toISOString(),
       resourceName: candidate.reservation.resourceName,
