@@ -7,8 +7,10 @@ import { ThrottlerGuard, ThrottlerModule, seconds } from '@nestjs/throttler';
 import envConfig from './config/environment/env.config';
 import { ConfigType } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { CloudinaryModule } from './config/cloudinary/cloudinary.module';
 import { DeiBookingModule } from './dei-booking/dei-booking.module';
+import { ReservationsModule } from './reservations/reservations.module';
+import { ResourcesModule } from './resources/resources.module';
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     AuthModule,
@@ -16,6 +18,7 @@ import { DeiBookingModule } from './dei-booking/dei-booking.module';
     UsersModule,
     MailModule,
     DeiBookingModule,
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRootAsync({
       inject: [envConfig.KEY],
       useFactory: (configService: ConfigType<typeof envConfig>) => [
@@ -30,7 +33,8 @@ import { DeiBookingModule } from './dei-booking/dei-booking.module';
         },
       ],
     }),
-    CloudinaryModule,
+    ReservationsModule,
+    ResourcesModule,
   ],
   providers: [
     {

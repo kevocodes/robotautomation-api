@@ -33,27 +33,51 @@ model User {
 }
 
 model Resource {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  externalResourceId String @unique
+
   name     String
   location String
+
+  isActive Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  SelectedResource SelectedResource[]
+  SelectedResource SelectedResource?
 
   @@map("resources")
 }
 
 model SelectedResource {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  resourceId String   @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  resourceId String   @unique @db.ObjectId
   resource   Resource @relation(fields: [resourceId], references: [id])
+
+  priority Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("selected-resources")
+}
+
+// schema.prisma
+
+model GlobalConfig {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  key String @unique @default("GLOBAL")
+
+  cleaningStartOffsetMinutes Int @default(15)
+  cleaningDurationMinutes    Int @default(10)
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@map("global-configs")
 }
 
 // model Activity {

@@ -33,8 +33,8 @@ export class DeiBookingHttpService {
         config.headers instanceof AxiosHeaders
           ? config.headers
           : new AxiosHeaders(config.headers);
-      headers.set('sessionToken', session.token);
-      headers.set('userID', session.userId);
+      headers.set('X-Booked-SessionToken', session.token);
+      headers.set('X-Booked-UserId', session.userId);
       config.headers = headers;
       return config;
     });
