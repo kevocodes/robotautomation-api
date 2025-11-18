@@ -12,7 +12,12 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import { DeiBookingHttpService } from 'src/dei-booking/dei-booking-http.service';
 import { ResourcesDeiResponse } from './dtos/resourcesDeiResponse';
-import { Prisma, Resource, SelectedResource } from '@prisma/client';
+import {
+  Prisma,
+  Resource,
+  RoomDirection,
+  SelectedResource,
+} from '@prisma/client';
 
 @Injectable()
 export class ResourcesService {
@@ -170,6 +175,24 @@ export class ResourcesService {
         'Unexpected error adjusting selected resources priorities',
       );
     }
+  }
+
+  async changeRoomDirection(
+    selectedResourceId: string,
+    direction: RoomDirection,
+  ): Promise<void> {
+    const selectedResource = await this.prisma.selectedResource.findUnique({
+      where: { id: selectedResourceId },
+    });
+
+    if (!selectedResource) {
+      throw new NotFoundException('Selected resource not found');
+    }
+
+    await this.prisma.selectedResource.update({
+      where: { id: selectedResourceId },
+      data: { roomDirection: direction },
+    });
   }
 
   /**

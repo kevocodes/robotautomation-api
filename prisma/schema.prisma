@@ -67,7 +67,7 @@ model SelectedResource {
   resource   Resource @relation(fields: [resourceId], references: [id])
 
   priority      Int
-  roomDirection RoomDirection
+  roomDirection RoomDirection @default(LEFT)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
