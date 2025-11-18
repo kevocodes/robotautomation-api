@@ -31,10 +31,22 @@ export class AppConfigController {
   @Get()
   async getSettings(): Promise<ApiResponse<GetAppConfigDto>> {
     // El servicio se encarga de leer desde el caché o la DB
+    const settings = await this.configService.getSettings();
+    const payload: GetAppConfigDto = {
+      cleaningStartOffsetMinutes: settings.cleaningStartOffsetMinutes,
+      cleaningDurationMinutes: settings.cleaningDurationMinutes,
+      cleaningVerificationFrequencyMinutes:
+        settings.cleaningVerificationFrequencyMinutes,
+      cleaningLookAheadMinutes: settings.cleaningLookAheadMinutes,
+      lastCleaningVerificationAt: settings.lastCleaningVerificationAt
+        ? settings.lastCleaningVerificationAt.toISOString()
+        : null,
+    };
+
     return {
       statusCode: HttpStatus.OK,
       message: 'Settings retrieved successfully',
-      data: await this.configService.getSettings(),
+      data: payload,
     };
   }
 

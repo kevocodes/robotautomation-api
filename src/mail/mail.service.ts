@@ -5,6 +5,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import envConfig from 'src/config/environment/env.config';
 import * as dayjs from 'dayjs';
+import { ReservationCleaningEvent } from 'src/reservations/dtos/reservationCleaningEvent';
 @Injectable()
 export class MailService {
   constructor(
@@ -67,6 +68,28 @@ export class MailService {
         token,
         name,
         forgotPage: this.configService.forgotPassword.page,
+      },
+    });
+  }
+
+  async sendCleaningStartedEmail(
+    recipients: string[],
+    event: ReservationCleaningEvent,
+    cleaningDurationMinutes: number,
+  ): Promise<void> {
+    if (!recipients.length) {
+      return;
+    }
+
+    await this.mailerService.sendMail({
+      to: recipients,
+      subject: `Limpieza iniciada en ${event.resourceName}`,
+      template: 'cleaning-started',
+      context: {
+        resourceName: event.resourceName,
+        reservationReferenceNumber: event.reservationReferenceNumber,
+        startTime: dayjs(event.startDate).format('DD/MM/YYYY HH:mm:ss'),
+        durationMinutes: cleaningDurationMinutes,
       },
     });
   }
