@@ -76,6 +76,34 @@ export class ResourcesController {
     };
   }
 
+  @Roles(Role.ADMIN, Role.USER)
+  @Get(':selectedResourceId')
+  async getSelectedResourceById(
+    @Param('selectedResourceId', MongoIdPipe) selectedResourceId: string,
+  ): Promise<ApiResponse> {
+    const resource =
+      await this.resourcesService.getSelectedResourceById(selectedResourceId);
+    return {
+      data: resource,
+      statusCode: HttpStatus.OK,
+      message: 'Selected resource retrieved successfully',
+    };
+  }
+
+  @Roles(Role.ADMIN, Role.USER)
+  @Get('by-resource/:resourceId')
+  async getSelectedResourceByResourceId(
+    @Param('resourceId', MongoIdPipe) resourceId: string,
+  ): Promise<ApiResponse> {
+    const resource =
+      await this.resourcesService.getSelectedResourceByResourceId(resourceId);
+    return {
+      data: resource,
+      statusCode: HttpStatus.OK,
+      message: 'Selected resource retrieved successfully',
+    };
+  }
+
   @ApiBody({ type: AdjustSelectedResourcesPrioritiesDto })
   @Roles(Role.ADMIN)
   @Patch('/adjust-priorities')

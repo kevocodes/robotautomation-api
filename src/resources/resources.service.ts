@@ -98,6 +98,21 @@ export class ResourcesService {
     return selectedResource;
   }
 
+  async getSelectedResourceByResourceId(
+    resourceId: string,
+  ): Promise<SelectedResource & { resource: Resource }> {
+    const selectedResource = await this.prisma.selectedResource.findUnique({
+      where: { resourceId },
+      include: { resource: true },
+    });
+
+    if (!selectedResource) {
+      throw new NotFoundException('Selected resource not found');
+    }
+
+    return selectedResource;
+  }
+
   async getSelectedResources(): Promise<
     (SelectedResource & { resource: Resource })[]
   > {
