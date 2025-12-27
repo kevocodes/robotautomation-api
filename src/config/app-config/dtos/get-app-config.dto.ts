@@ -3,11 +3,11 @@ import { IsGreaterOrEqualThan } from 'src/common/validators/is-greater-or-equal-
 
 export class GetAppConfigDto {
   @IsInt()
-  @Min(5)
+  @Min(1)
   cleaningStartOffsetMinutes: number;
 
   @IsInt()
-  @Min(5)
+  @Min(1)
   cleaningDurationMinutes: number;
 
   @IsInt()

@@ -82,8 +82,8 @@ model GlobalConfig {
 
   key String @unique @default("GLOBAL")
 
-  cleaningStartOffsetMinutes           Int       @default(15)
-  cleaningDurationMinutes              Int       @default(10)
+  cleaningStartOffsetMinutes           Int       @default(1)
+  cleaningDurationMinutes              Int       @default(1)
   cleaningVerificationFrequencyMinutes Int       @default(60)
   cleaningLookAheadMinutes             Int       @default(120)
   lastCleaningVerificationAt           DateTime?
@@ -114,64 +114,3 @@ model CleaningTask {
 
   @@map("cleaning-tasks")
 }
-
-// model Activity {
-//   id       String   @id @default(auto()) @map("_id") @db.ObjectId
-//   title    String
-//   datetime DateTime
-//   isAllDay Boolean
-//   creator  String
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   User      User?    @relation(fields: [userId], references: [id])
-//   userId    String?  @db.ObjectId
-
-//   @@map("activities")
-// }
-
-// model Event {
-//   id        String       @id @default(auto()) @map("_id") @db.ObjectId
-//   title     String
-//   datetime  DateTime
-//   location  String
-//   completed Boolean      @default(false)
-//   thumbnail String
-//   public_id String
-//   creator   String
-//   images    EventImage[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   User      User?    @relation(fields: [userId], references: [id])
-//   userId    String?  @db.ObjectId
-
-//   @@map("events")
-// }
-
-// model EventImage {
-//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-//   eventId   String   @db.ObjectId
-//   event     Event    @relation(fields: [eventId], references: [id])
-//   url       String
-//   width     Int
-//   height    Int
-//   public_id String
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@map("event-images")
-// }
-
-// model Installation {
-//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-//   name      String
-//   url       String
-//   width     Int
-//   height    Int
-//   public_id String
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@map("installations")
-// }
