@@ -24,7 +24,7 @@ export class MqttController {
   constructor(
     private readonly mqttService: MqttService,
     private readonly routinesService: RoutinesService,
-  ) {}
+  ) { }
 
   @Post('publish')
   async publish(
@@ -66,15 +66,11 @@ export class MqttController {
   @Sse('stream')
   stream(
     @Query('topic') topic?: string,
-  ): ApiResponse<Observable<MessageEvent>> {
+  ): Observable<MessageEvent> {
     if (!topic) {
       throw new BadRequestException('The "topic" query parameter is required');
     }
 
-    return {
-      data: this.mqttService.streamTopic(topic),
-      message: 'SSE stream established successfully',
-      statusCode: HttpStatus.OK,
-    };
+    return this.mqttService.streamTopic(topic);
   }
 }
