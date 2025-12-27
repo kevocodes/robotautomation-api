@@ -11,6 +11,7 @@ import { DeiBookingModule } from './dei-booking/dei-booking.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { ResourcesModule } from './resources/resources.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MqttModule } from './mqtt/mqtt.module';
 @Module({
   imports: [
     AuthModule,
@@ -35,6 +36,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     ReservationsModule,
     ResourcesModule,
+    MqttModule,
   ],
   providers: [
     {

@@ -12,12 +12,18 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import { DeiBookingHttpService } from 'src/dei-booking/dei-booking-http.service';
 import { ResourcesDeiResponse } from './dtos/resourcesDeiResponse';
-import { Prisma, Resource, SelectedResource } from '@prisma/client';
+import {
+  Prisma,
+  Resource,
+  RoomDirection,
+  SelectedResource,
+} from '@prisma/client';
 
 @Injectable()
 export class ResourcesService {
   private readonly logger = new Logger(ResourcesService.name);
   private readonly resourcesPath = '/Resources/';
+  private readonly maxSelectionLimit = 2;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -41,6 +47,15 @@ export class ResourcesService {
   }
 
   async selectResource(id: string): Promise<SelectedResource> {
+    // Verify selection limit
+    const currentSelectionsCount = await this.prisma.selectedResource.count();
+
+    if (currentSelectionsCount >= this.maxSelectionLimit) {
+      throw new BadRequestException(
+        `Selection limit of ${this.maxSelectionLimit} reached`,
+      );
+    }
+
     const resource = await this.getOneById(id);
 
     // Check if already selected
@@ -160,6 +175,24 @@ export class ResourcesService {
         'Unexpected error adjusting selected resources priorities',
       );
     }
+  }
+
+  async changeRoomDirection(
+    selectedResourceId: string,
+    direction: RoomDirection,
+  ): Promise<void> {
+    const selectedResource = await this.prisma.selectedResource.findUnique({
+      where: { id: selectedResourceId },
+    });
+
+    if (!selectedResource) {
+      throw new NotFoundException('Selected resource not found');
+    }
+
+    await this.prisma.selectedResource.update({
+      where: { id: selectedResourceId },
+      data: { roomDirection: direction },
+    });
   }
 
   /**

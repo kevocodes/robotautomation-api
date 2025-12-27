@@ -60,4 +60,12 @@ export default registerAs('env', () => ({
     identifier: process.env.DEI_IDENTIFIER,
     tokenExpiration: parseInt(process.env.DEI_TOKEN_EXPIRATION, 10),
   },
+  mqtt: {
+    url: process.env.MQTT_URL,
+    username: process.env.MQTT_USERNAME,
+    password: process.env.MQTT_PASSWORD,
+    clientId: process.env.MQTT_CLIENT_ID,
+    keepAlive: parseInt(process.env.MQTT_KEEPALIVE ?? '60', 10),
+    reconnectPeriod: parseInt(process.env.MQTT_RECONNECT_PERIOD ?? '5000', 10),
+  },
 }));

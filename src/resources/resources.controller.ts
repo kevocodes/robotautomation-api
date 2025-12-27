@@ -17,6 +17,7 @@ import { ResourcesService } from './resources.service';
 import { ApiResponse } from 'src/common/types/response.type';
 import { MongoIdPipe } from 'src/common/pipes/mongo-id.pipe';
 import { AdjustSelectedResourcesPrioritiesDto } from './dtos/adjustSelectedResourcesPriorities';
+import { ChangeRoomDirectionDto } from './dtos/changeRoomDirection';
 
 @ApiTags('Resources')
 @ApiBearerAuth()
@@ -90,6 +91,27 @@ export class ResourcesController {
       statusCode: HttpStatus.OK,
       message: 'Selected resources priorities adjusted successfully',
       data: null,
+    };
+  }
+
+  @ApiBody({ type: ChangeRoomDirectionDto })
+  @Roles(Role.ADMIN)
+  @Patch(':selectedResourceId/change-room-direction')
+  async changeRoomDirection(
+    @Param('selectedResourceId', MongoIdPipe)
+    selectedResourceId: string,
+    @Body() body: ChangeRoomDirectionDto,
+  ): Promise<ApiResponse> {
+    const updatedSelectedResource =
+      await this.resourcesService.changeRoomDirection(
+        selectedResourceId,
+        body.roomDirection,
+      );
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Room direction changed successfully',
+      data: updatedSelectedResource,
     };
   }
 }

@@ -58,6 +58,24 @@ $ pnpm run test:e2e
 $ pnpm run test:cov
 ```
 
+## MQTT Integration
+
+Set the following environment variables so the API can connect to your MQTT broker:
+
+```
+MQTT_URL=mqtt://localhost:1883
+MQTT_USERNAME=<optional-user>
+MQTT_PASSWORD=<optional-pass>
+MQTT_CLIENT_ID=robotautomation-api
+MQTT_KEEPALIVE=60
+MQTT_RECONNECT_PERIOD=5000
+```
+
+Once the server is running you can:
+
+- Publish messages through `POST /mqtt/publish` with a body like `{ "topic": "robot/commands", "payload": { "action": "start" }, "qos": 1 }`.
+- Subscribe from your React frontend (or any HTTP client) using Server-Sent Events via `GET /mqtt/stream?topic=robot/status` to receive the payloads published by the robot or other devices.
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).

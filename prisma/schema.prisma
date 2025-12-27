@@ -17,6 +17,11 @@ enum CleaningTaskStatus {
   NOTIFIED
 }
 
+enum RoomDirection {
+  LEFT
+  RIGHT
+}
+
 model User {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
   email    String @unique
@@ -61,7 +66,8 @@ model SelectedResource {
   resourceId String   @unique @db.ObjectId
   resource   Resource @relation(fields: [resourceId], references: [id])
 
-  priority Int
+  priority      Int
+  roomDirection RoomDirection @default(LEFT)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -76,10 +82,10 @@ model GlobalConfig {
 
   key String @unique @default("GLOBAL")
 
-  cleaningStartOffsetMinutes Int @default(15)
-  cleaningDurationMinutes    Int @default(10)
-  cleaningVerificationFrequencyMinutes Int @default(60)
-  cleaningLookAheadMinutes             Int @default(120)
+  cleaningStartOffsetMinutes           Int       @default(15)
+  cleaningDurationMinutes              Int       @default(10)
+  cleaningVerificationFrequencyMinutes Int       @default(60)
+  cleaningLookAheadMinutes             Int       @default(120)
   lastCleaningVerificationAt           DateTime?
 
   updatedAt DateTime @updatedAt
@@ -91,17 +97,17 @@ model GlobalConfig {
 model CleaningTask {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  eventId                     String   @unique
-  resourceId                  String
-  resourceName                String
-  reservationReferenceNumber  String
-  startDate                   DateTime
-  endDate                     DateTime
-  color                       String
-  textColor                   String
-  status                      CleaningTaskStatus @default(PENDING)
-  scheduledAt                 DateTime           @default(now())
-  notifiedAt                  DateTime?
+  eventId                    String             @unique
+  resourceId                 String
+  resourceName               String
+  reservationReferenceNumber String
+  startDate                  DateTime
+  endDate                    DateTime
+  color                      String
+  textColor                  String
+  status                     CleaningTaskStatus @default(PENDING)
+  scheduledAt                DateTime           @default(now())
+  notifiedAt                 DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
