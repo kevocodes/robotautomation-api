@@ -5,6 +5,8 @@ import { MailService } from 'src/mail/mail.service';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import { CleaningScheduleService } from './cleaning-schedule.service';
 import { ReservationCleaningEvent } from './dtos/reservationCleaningEvent';
+import { RoutinesService } from 'src/mqtt/routines.service';
+import { ResourcesService } from 'src/resources/resources.service';
 
 @Injectable()
 export class CleaningNotificationsService {
@@ -14,6 +16,8 @@ export class CleaningNotificationsService {
     private readonly cleaningScheduleService: CleaningScheduleService,
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
+    private readonly routinesService: RoutinesService,
+    private readonly resourcesService: ResourcesService,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
@@ -84,6 +88,13 @@ export class CleaningNotificationsService {
           color: task.color,
           textColor: task.textColor,
         };
+
+        const selectedResource =
+          await this.resourcesService.getSelectedResourceByExternalResourceId(
+            task.resourceId,
+          );
+
+        await this.routinesService.executeRoutine({}, selectedResource.id);
 
         await this.mailService.sendCleaningStartedEmail(
           recipients,

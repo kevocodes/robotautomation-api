@@ -6,9 +6,6 @@ import { join } from 'path';
 import { MailerModule } from '@nestjs-modules/mailer';
 import envConfig from 'src/config/environment/env.config';
 import { ConfigType } from '@nestjs/config';
-
-console.log('TEMPLATES DIR ->', join(__dirname, 'templates'));
-
 @Module({
   imports: [
     MailerModule.forRootAsync({

@@ -104,6 +104,23 @@ export class ResourcesController {
     };
   }
 
+  @Roles(Role.ADMIN, Role.USER)
+  @Get('by-external-id/:externalResourceId')
+  async getSelectedResourceByExternalResourceId(
+    @Param('externalResourceId')
+    externalResourceId: string,
+  ): Promise<ApiResponse> {
+    const resource =
+      await this.resourcesService.getSelectedResourceByExternalResourceId(
+        externalResourceId,
+      );
+    return {
+      data: resource,
+      statusCode: HttpStatus.OK,
+      message: 'Selected resource retrieved successfully',
+    };
+  }
+
   @ApiBody({ type: AdjustSelectedResourcesPrioritiesDto })
   @Roles(Role.ADMIN)
   @Patch('/adjust-priorities')
