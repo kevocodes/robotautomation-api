@@ -7,5 +7,6 @@ import { DeiBookingModule } from 'src/dei-booking/dei-booking.module';
   imports: [DeiBookingModule],
   providers: [ResourcesService],
   controllers: [ResourcesController],
+  exports: [ResourcesService],
 })
 export class ResourcesModule {}

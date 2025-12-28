@@ -7,9 +7,17 @@ import { CleaningNotificationsService } from './cleaning-notifications.service';
 import { MailModule } from 'src/mail/mail.module';
 import { CleaningScheduleService } from './cleaning-schedule.service';
 import { CleaningScheduleController } from './cleaning-schedule.controller';
+import { MqttModule } from 'src/mqtt/mqtt.module';
+import { ResourcesModule } from 'src/resources/resources.module';
 
 @Module({
-  imports: [DeiBookingModule, AppConfigModule, MailModule],
+  imports: [
+    DeiBookingModule,
+    AppConfigModule,
+    MailModule,
+    MqttModule,
+    ResourcesModule,
+  ],
   controllers: [ReservationsController, CleaningScheduleController],
   providers: [
     ReservationsService,
