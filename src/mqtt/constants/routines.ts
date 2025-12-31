@@ -41,7 +41,7 @@ export const rightRoutine: RoutineStep[] = [
   },
   {
     type: RoutineType.L_left,
-    decision: RoutineDecision.right,
+    decision: RoutineDecision.left,
     action: RoutineAction.none,
   },
   {

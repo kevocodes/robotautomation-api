@@ -12,27 +12,23 @@
   >
     <tr>
       <td style='padding: 20px 0; text-align: center'>
-        <h1 style='color: #333333; font-size: 24px; margin: 0'>
-          ¡{{name}}
-          quiere contactarnos!
+        <h1 style='color: #333333; font-size: 24px; contact-usmargin: 0'>
+          ¡Bienvienido
+          {{name}}
+          {{lastname}}!
         </h1>
       </td>
     </tr>
     <tr>
       <td style='padding: 0 20px'>
         <p style='color: #333333; font-size: 16px; line-height: 1.5'>
-          Hemos recibido un mensaje a través de nuestro formulario de contacto.
-          A continuación te mostramos los datos de la persona que ha enviado el
-          mensaje:
+          Se te ha registrado como nuevo usuario en nuestro sistema de
+          administración de Robot Autónomo. A continuación, se presentan los
+          detalles de tu información de inicio de sesión:
         </p>
         <h3 style='color: #333333; font-size: 18px; line-height: 1.5'>
-          Mensaje de contacto:
+          Credenciales de Usuario:
         </h3>
-        <blockquote
-          style='border-left: 4px solid #2563EB; padding-left: 8px; font-style: italic; margin: 0;'
-        >
-          {{message}}
-        </blockquote>
         <ul
           style='
                 color: #333333;
@@ -41,12 +37,13 @@
                 padding-left: 20px;
               '
         >
-          <li>Nombre: {{name}} {{lastname}}</li>
-          <li>Correo electrónico: {{email}}</li>
-          <li>Número de teléfono: {{phoneNumber}}</li>
+          <li><b>Correo electrónico:</b> {{email}}</li>
+          <li><b>Contraseña:</b> {{password}}</li>
+          <li><b>Rol:</b> {{role}}</li>
         </ul>
         <p style='color: #333333; font-size: 16px; line-height: 1.5'>
-          Por favor, responder con la mayor brevedad posible.
+          Te recomendamos cambiar tu contraseña después de tu primer inicio de
+          sesión para garantizar la seguridad de tu cuenta.
         </p>
       </td>
     </tr>

@@ -1,7 +1,8 @@
+import { Role } from '@prisma/client';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
-export class ContactUsDto {
+export class WelcomeEmailDto {
   @Transform(({ value }) => value.trim())
   @IsString()
   @IsNotEmpty()
@@ -18,10 +19,9 @@ export class ContactUsDto {
   @Transform(({ value }) => value.trim())
   @IsString()
   @IsNotEmpty()
-  message: string;
+  password: string;
 
   @Transform(({ value }) => value.trim())
-  @IsString()
-  @IsNotEmpty()
-  phoneNumber: string;
+  @IsEnum(Role)
+  role: Role;
 }

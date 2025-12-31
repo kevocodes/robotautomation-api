@@ -1,6 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { ApiResponse } from 'src/common/types/response.type';
-import { ContactUsDto } from './dtos/contact-us.dto';
+import { WelcomeEmailDto } from './dtos/welcome-email.dto';
 import { Injectable, Inject } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import envConfig from 'src/config/environment/env.config';
@@ -14,17 +14,17 @@ export class MailService {
     private readonly configService: ConfigType<typeof envConfig>,
   ) {}
 
-  async sendContactUsEmail(data: ContactUsDto): Promise<ApiResponse> {
+  async sendWelcomeEmail(data: WelcomeEmailDto): Promise<ApiResponse> {
     await this.mailerService.sendMail({
-      to: this.configService.smtp.contactUsEmail,
-      subject: '¡Nueva solicitud de contacto recibida!',
-      template: 'contact-us',
+      to: data.email,
+      subject: '¡Correo de Bienvenida!',
+      template: 'welcome',
       context: {
         name: data.name,
         lastname: data.lastname,
         email: data.email,
-        message: data.message,
-        phoneNumber: data.phoneNumber,
+        password: data.password,
+        role: data.role,
       },
     });
 
