@@ -17,6 +17,7 @@ import { ApiResponse } from 'src/common/types/response.type';
 import envConfig from 'src/config/environment/env.config';
 import { CreateUserDto, UpdateUserDto } from './dtos/users.dto';
 import { TokenPayload } from 'src/auth/types/token.type';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UsersService {
@@ -24,6 +25,7 @@ export class UsersService {
     @Inject(envConfig.KEY)
     private readonly config: ConfigType<typeof envConfig>,
     private readonly prismaService: PrismaService,
+    private readonly mailService: MailService,
   ) {}
 
   async create(userData: CreateUserDto): Promise<ApiResponse> {
@@ -37,6 +39,7 @@ export class UsersService {
       throw new ConflictException('User already exists');
     }
 
+    const rawPassword = userData.password;
     const hashedPassword = await bcrypt.hash(
       userData.password,
       this.config.hash.rounds,
@@ -46,6 +49,14 @@ export class UsersService {
 
     const user = await this.prismaService.user.create({
       data: userData,
+    });
+
+    this.mailService.sendWelcomeEmail({
+      name: user.name,
+      lastname: user.lastname,
+      email: user.email,
+      password: rawPassword,
+      role: user.role,
     });
 
     delete user.password;
